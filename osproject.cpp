@@ -26,7 +26,7 @@ bool idsort(const p_inf& a , const p_inf& b)
 	return a.processid < b.processid;
 }
 /** Sorting on the base of arrival time if that match then on priority of priority also  match than on the base of Process Id**/
-bool arrivalsort( const p_inf& p ,const p_inf& q)
+bool arrivalordering( const p_inf& p ,const p_inf& q)
 {
 	if(p.arrivaltime < p.arrivaltime)
 		return true;
@@ -65,7 +65,7 @@ struct comPare
 	
 };
 
-/**To check the Input **/
+/**To check the givenuserinput **/
 void my_check(vector<p_inf> mv)
 {
 	for(unsigned int i= 0; i < mv.size() ;i++)
@@ -78,8 +78,8 @@ void my_check(vector<p_inf> mv)
 int main()
 {
 	int i;
-	vector< p_inf > input;
-	vector<p_inf> input_copy;
+	vector< p_inf > givenuserinput;
+	vector<p_inf> givenuserinput_copy;
 	p_inf temp;
 	int pq_process = 0; // for PQ process
 	int rq_process = 0; // for RQ process
@@ -90,41 +90,52 @@ int main()
 	int n;
 	int clock;
 	int totalexecutiontime = 0;
+	cout<<"\nEnter the no. of process\n";
 	cin>>n;
 	for( i= 0; i< n; i++ )
 	{
-		cin>>processid>>arrivaltime>>bursttime>>priority;
+		cout<<"\nEnter the following detail for process  "<<i+1 <<"  below :\n";
+		cout<<"\nEnter process Id :";
+		
+		cin>>processid;
+		cout<<"\nEnter Arrival Time :";
+		cin>>arrivaltime;
+		cout<<"\nEnter burst time :";
+		
+		cin>>bursttime;
+		cout<<"\nEnter priority :";
+		cin>>priority;
 		temp.number = i+1;
 		temp.arrivaltime = arrivaltime;
 		temp.bursttime = bursttime;
 		temp.remainingtime = bursttime;
 		temp.processid = processid;
 		temp.priority = priority;
-		input.push_back(temp);
+		givenuserinput.push_back(temp);
 	}
-	input_copy = input;
-	sort( input.begin(), input.end(), arrivalsort );
-    //cout<<"arrivalsort : "<<endl;
-    //my_check( input ); // To check the sort unomment it
-    totalexecutiontime = totalexecutiontime + input[0].arrivaltime;
+	givenuserinput_copy = givenuserinput;
+	sort( givenuserinput.begin(), givenuserinput.end(), arrivalordering );
+    //cout<<"arrivalordering : "<<endl;
+    //my_check( givenuserinput ); // To check the sort unomment it
+    totalexecutiontime = totalexecutiontime + givenuserinput[0].arrivaltime;
     for( i= 0 ;i< n; i++ )
     {
-    	if( totalexecutiontime >= input[i].arrivaltime )
+    	if( totalexecutiontime >= givenuserinput[i].arrivaltime )
     	{
-    		totalexecutiontime = totalexecutiontime +input[i].bursttime;
+    		totalexecutiontime = totalexecutiontime +givenuserinput[i].bursttime;
     	}
     	else
     	{
-    		int diff = (input[i].arrivaltime - totalexecutiontime);
+    		int diff = (givenuserinput[i].arrivaltime - totalexecutiontime);
     		totalexecutiontime = totalexecutiontime + diff + bursttime;
 
     	}
     }
 
-	int Ghant[totalexecutiontime]={0}; //Ghant Chart
+	int ghant_array[totalexecutiontime]={0}; //ghant_array Chart
 	for( i= 0; i< totalexecutiontime; i++ )
 	{
-		Ghant[i]=-1;
+		ghant_array[i]=-1;
 	}
 	//cout<<"totalexecutiontime : "<<totalexecutiontime<<endl;
 
@@ -141,9 +152,9 @@ int main()
 		/**Insert the process with same Arrival time in priority Queue**/
 		for( int j = 0; j< n ; j++ )
 		{
-			if(clock == input[j].arrivaltime)
+			if(clock == givenuserinput[j].arrivaltime)
 			{
-				pq.push(input[j]);
+				pq.push(givenuserinput[j]);
 			}
 		}
 		
@@ -197,7 +208,7 @@ int main()
 		{
 			current.remainingtime--;
 			quantum--;
-			Ghant[clock] = current.processid;
+			ghant_array[clock] = current.processid;
 			if(current.remainingtime == 0) //If process Finish
 			{
 				cpu_state = 0 ;
@@ -223,15 +234,15 @@ int main()
 	}
 
 
-	sort( input.begin(), input.end(), idsort );
+	sort( givenuserinput.begin(), givenuserinput.end(), idsort );
 	
 	for(int i=0;i<n;i++)
 	{
 		for(int k=totalexecutiontime;k>=0;k--)
 		{
-			if(Ghant[k]==i+1)
+			if(ghant_array[k]==i+1)
 			{
-				input[i].finishtime=k+1;
+				givenuserinput[i].finishtime=k+1;
 				break;
 
 			}
@@ -242,26 +253,26 @@ int main()
 		for(int k=0;k<totalexecutiontime;k++)
 		{
 
-			if(Ghant[k]==i+1)
+			if(ghant_array[k]==i+1)
 			{
-				input[i].starttime=k;
+				givenuserinput[i].starttime=k;
 				break;
 			}
 		}
 	}
 	
-	sort( input.begin(), input.end(), numbersort );
+	sort( givenuserinput.begin(), givenuserinput.end(), numbersort );
 
 	for(int i=0;i<n;i++)
 	{
-		input[i].restarttime=input[i].starttime-input[i].arrivaltime;
-		input[i].waitingtime=(input[i].finishtime-input[i].arrivaltime)-input[i].bursttime;
+		givenuserinput[i].restarttime=givenuserinput[i].starttime-givenuserinput[i].arrivaltime;
+		givenuserinput[i].waitingtime=(givenuserinput[i].finishtime-givenuserinput[i].arrivaltime)-givenuserinput[i].bursttime;
 
 	}
-	
+	cout<<"Process Id   restart time            finish time            waiting time\n";
 	for(int i=0;i<n;i++)
 	{
-		cout<<input[i].processid<<" "<<input[i].restarttime<<" "<<input[i].finishtime<<" "<<input[i].waitingtime<<endl;
+		cout<<givenuserinput[i].processid<<"                   "<<givenuserinput[i].restarttime<<"                     "<<givenuserinput[i].finishtime<<"                       "<<givenuserinput[i].waitingtime<<endl;
 		
 	}	
 	return 0;
